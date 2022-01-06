@@ -33,7 +33,7 @@ Download grátis do app do TechTudo: receba dicas e notícias de tecnologia no A
 <div>
   <h2>Sobre o jogo</h2>
   
-  Criando Super Mario Bros com minha própria engine!
+  Criando Space Invaders com minha própria engine!
    <br><br>
 
   Para jogar baixe o aquivivo e execute - <a href="">Clique aqui </a>
