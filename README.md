@@ -1,4 +1,4 @@
-# 👽Space Invaders
+# 👾Space Invaders
 
 <p align="middle">•Em andamento•</p>
 
