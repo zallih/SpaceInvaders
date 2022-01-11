@@ -34,7 +34,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 	private boolean isRunning = true;
 	public static final int WIDTH = 120;
 	public static final int HEIGHT = 160;
-	public static final int SCALE = 3;
+	public static final int SCALE = 4;
 	
 	private BufferedImage image;
 	
@@ -57,8 +57,8 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		//Inicializando objetos.
 		spritesheet = new Spritesheet("/spritesheet.png");
 		entities = new ArrayList<Entity>();
-		player = new Player(16,16,16,16,1,null);
-		world = new World();
+		player = new Player(Game.WIDTH/2,Game.HEIGHT - 26,16,16,1,spritesheet.getSprite(32, 0, 16, 16));
+		//world = new World();
 		ui = new UI();
 		
 		entities.add(player);
@@ -121,7 +121,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		
 		/*Renderização do jogo*/
 		//Graphics2D g2 = (Graphics2D) g;
-		world.render(g);
+		//world.render(g);
 		Collections.sort(entities,Entity.nodeSorter);
 		for(int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
@@ -168,12 +168,29 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-	
+		
+		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||
+				e.getKeyCode() == KeyEvent.VK_D) {
+				player.right = true;
+				player.left = false;
+			}else if(e.getKeyCode() == KeyEvent.VK_LEFT || 
+					e.getKeyCode() == KeyEvent.VK_A) {
+					player.left = true;
+					player.right = false;
+			}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		
+//		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||
+//				e.getKeyCode() == KeyEvent.VK_D) {
+//				
+//				player.right = false;
+//				
+//		}else if(e.getKeyCode() == KeyEvent.VK_LEFT || 
+//					e.getKeyCode() == KeyEvent.VK_A) {
+//					player.left = false;
+//		}
 	}
 
 	@Override
