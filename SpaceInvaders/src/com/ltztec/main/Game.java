@@ -11,10 +11,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import com.ltztec.entities.Entity;
@@ -23,10 +25,7 @@ import com.ltztec.graficos.Spritesheet;
 import com.ltztec.graficos.UI;
 import com.ltztec.world.World;
 
-
-
-
-public class Game extends Canvas implements Runnable,KeyListener,MouseListener,MouseMotionListener{
+public class Game extends Canvas implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
@@ -35,37 +34,45 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 	public static final int WIDTH = 120;
 	public static final int HEIGHT = 160;
 	public static final int SCALE = 4;
-	
+
 	private BufferedImage image;
-	
+
 	public static World world;
 	public static List<Entity> entities;
 	public static Spritesheet spritesheet;
 	public static Player player;
-	
+
+	public EnemySpawn enemySpawn;
+
+	public BufferedImage game_bg;
 
 	public UI ui;
-	
-	public Game(){
+
+	public Game() {
 		addKeyListener(this);
 		addMouseListener(this);
 		addMouseMotionListener(this);
-		setPreferredSize(new Dimension(WIDTH*SCALE,HEIGHT*SCALE));
+		setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
 		initFrame();
-		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
-		
-		//Inicializando objetos.
+		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+
+		// Inicializando objetos.
 		spritesheet = new Spritesheet("/spritesheet.png");
 		entities = new ArrayList<Entity>();
-		player = new Player(Game.WIDTH/2,Game.HEIGHT - 26,16,16,1,spritesheet.getSprite(32, 0, 16, 16));
-		//world = new World();
+		player = new Player(Game.WIDTH / 2, Game.HEIGHT - 26, 16, 16, 1, spritesheet.getSprite(32, 0, 16, 16));
+		// world = new World();
 		ui = new UI();
-		
+		enemySpawn = new EnemySpawn();
+		try {
+			game_bg = ImageIO.read(getClass().getResource("/bg.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		entities.add(player);
-		
+
 	}
-	
-	public void initFrame(){
+
+	public void initFrame() {
 		frame = new JFrame("Space Invaders");
 		frame.add(this);
 		frame.setResizable(false);
@@ -74,14 +81,14 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
-	
-	public synchronized void start(){
+
+	public synchronized void start() {
 		thread = new Thread(this);
 		isRunning = true;
 		thread.start();
 	}
-	
-	public synchronized void stop(){
+
+	public synchronized void stop() {
 		isRunning = false;
 		try {
 			thread.join();
@@ -89,53 +96,51 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 			e.printStackTrace();
 		}
 	}
-	
-	public static void main(String args[]){
+
+	public static void main(String args[]) {
 		Game game = new Game();
 		game.start();
 	}
-	
-	public void tick(){
-		for(int i = 0; i < entities.size(); i++) {
+
+	public void tick() {
+		enemySpawn.tick();
+		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			e.tick();
 		}
-		
+
 		ui.tick();
 
-		
 	}
-	
 
-
-	
-	public void render(){
+	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
-		if(bs == null){
+		if (bs == null) {
 			this.createBufferStrategy(3);
 			return;
 		}
 		Graphics g = image.getGraphics();
-		g.setColor(new Color(0,0,0));
-		g.fillRect(0, 0,WIDTH,HEIGHT);
-		
-		/*Renderização do jogo*/
-		//Graphics2D g2 = (Graphics2D) g;
-		//world.render(g);
-		Collections.sort(entities,Entity.nodeSorter);
-		for(int i = 0; i < entities.size(); i++) {
+		g.setColor(new Color(0, 0, 0));
+		g.fillRect(0, 0, WIDTH, HEIGHT);
+		g.drawImage(game_bg, 0, 0, null);
+
+		/* Renderização do jogo */
+		// Graphics2D g2 = (Graphics2D) g;
+		// world.render(g);
+		Collections.sort(entities, Entity.nodeSorter);
+		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			e.render(g);
 		}
-		
+
 		/***/
 		g.dispose();
 		g = bs.getDrawGraphics();
-		g.drawImage(image, 0, 0,WIDTH*SCALE,HEIGHT*SCALE,null);
+		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
 		ui.render(g);
 		bs.show();
 	}
-	
+
 	public void run() {
 		long lastTime = System.nanoTime();
 		double amountOfTicks = 60.0;
@@ -144,40 +149,42 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		int frames = 0;
 		double timer = System.currentTimeMillis();
 		requestFocus();
-		while(isRunning){
+		while (isRunning) {
 			long now = System.nanoTime();
-			delta+= (now - lastTime) / ns;
+			delta += (now - lastTime) / ns;
 			lastTime = now;
-			if(delta >= 1) {
+			if (delta >= 1) {
 				tick();
 				render();
 				frames++;
 				delta--;
 			}
-			
-			if(System.currentTimeMillis() - timer >= 1000){
-				System.out.println("FPS: "+ frames);
+
+			if (System.currentTimeMillis() - timer >= 1000) {
+				System.out.println("FPS: " + frames);
 				frames = 0;
-				timer+=1000;
+				timer += 1000;
 			}
-			
+
 		}
-		
+
 		stop();
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
+			player.right = true;
+			player.left = false;
+		} else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
+			player.left = true;
+			player.right = false;
+		}
 		
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||
-				e.getKeyCode() == KeyEvent.VK_D) {
-				player.right = true;
-				player.left = false;
-			}else if(e.getKeyCode() == KeyEvent.VK_LEFT || 
-					e.getKeyCode() == KeyEvent.VK_A) {
-					player.left = true;
-					player.right = false;
-			}
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			player.isShooting = true;
+		}
 	}
 
 	@Override
@@ -191,54 +198,50 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 //					e.getKeyCode() == KeyEvent.VK_A) {
 //					player.left = false;
 //		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			player.isShooting = false;
+		}
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		
-	
+
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-	
+
 	}
 
-	
 }
