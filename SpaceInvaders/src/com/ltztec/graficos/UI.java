@@ -1,8 +1,11 @@
 package com.ltztec.graficos;
 
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 
+import com.ltztec.main.Game;
 import com.ltztec.world.World;
 
 
@@ -36,6 +39,20 @@ public class UI {
 	}
 
 	public void render(Graphics g) {
+		
+		
+		g.setColor(Color.red);
+		g.fillRect(315, 15, 150, 25);
+		g.setColor(Color.green);
+		g.fillRect(315, 15, (int)((Game.player.life/Game.player.maxLife)*150), 25);
+		
+		g.setColor(Color.white);
+		g.setFont(new Font("Arial", Font.BOLD,20));
+		g.drawString((int)Game.player.life+"/"+(int)Game.player.maxLife, 350, 35);
+		
+		g.setColor(Color.white);
+		g.setFont(new Font("Arial", Font.BOLD,20));
+		g.drawString("Score - " + (int)Game.score, 15, 35);
 		
 		if(minutes < 10) {
 			formatTime+="0"+minutes+":";

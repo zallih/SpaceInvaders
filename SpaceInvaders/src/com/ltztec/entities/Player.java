@@ -12,7 +12,8 @@ import com.ltztec.main.Game;
 
 public class Player extends Entity{
 
-	
+	public double life = 100;
+	public double maxLife = 100;
 	public boolean right, left;
 	public boolean isShooting = false;
 	
